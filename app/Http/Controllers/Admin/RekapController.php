@@ -12,9 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class RekapController extends Controller
 {
-    /**
-     * Menampilkan rekap pembayaran per kelas
-     */
+    
     public function index(Request $request)
     {
         $kelasList = Kelas::orderBy('nama_kelas', 'asc')->get();
@@ -29,14 +27,14 @@ class RekapController extends Controller
         foreach ($kelas as $k) {
             $totalSiswa = $k->siswa->count();
             
-            // Hitung siswa lunas dan belum lunas
+           
             $siswaLunas = 0;
             $siswaBelumLunas = 0;
             $totalPembayaran = 0;
             $totalTunggakan = 0;
             
             foreach ($k->siswa as $siswa) {
-                // Hitung total pembayaran siswa untuk tahun SPP aktif
+                
                 $totalBayarSiswa = Pembayaran::where('id_siswa', $siswa->id)
                     ->where('tahun_dibayar', $sppAktif->tahun ?? date('Y'))
                     ->where('id_spp', $sppAktif->id ?? null)
@@ -44,7 +42,7 @@ class RekapController extends Controller
                 
                 $totalPembayaran += $totalBayarSiswa;
                 
-                // Tentukan status berdasarkan pembayaran vs nominal SPP
+                
                 $nominalSpp = $sppAktif->nominal ?? 0;
                 if ($nominalSpp > 0 && $totalBayarSiswa >= $nominalSpp) {
                     $siswaLunas++;

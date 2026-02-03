@@ -14,16 +14,55 @@ class PembayaranController extends Controller
 {
     public function create(Request $request)
     {
-        $kelas = Kelas::all(); 
-        $spp = Spp::orderBy('tahun', 'desc')->get();
-        $riwayat = Siswa::with(['kelas', 'pembayaran'])->paginate(10);
-        $siswa = null; 
+        $siswaList = Siswa::all(); 
+        $selectedSiswa = null;
+        $tagihan = [];
 
-        return view('admin.pembayaran.create', compact('siswa', 'spp', 'kelas', 'riwayat'));
+        if ($request->has('id_siswa')) {
+            $selectedSiswa = Siswa::find($request->id_siswa);
+            
+            if ($selectedSiswa) {
+               
+                $years = [2024, 2025, 2026];
+                $months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'July', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+
+                
+                $sppData = Spp::whereIn('tahun', $years)->get()->keyBy('tahun'); 
+
+                foreach ($years as $year) {
+                  
+                    $nominal = $sppData[$year]->nominal ?? 0;
+                    if ($nominal == 0) {
+                       
+                        $lastSpp = Spp::latest()->first();
+                        $nominal = $lastSpp ? $lastSpp->nominal : 0;
+                    }
+
+                    foreach ($months as $index => $month) {
+                        
+                        $pembayaran = Pembayaran::where('id_siswa', $selectedSiswa->id)
+                                                ->where('tahun_dibayar', $year)
+                                                ->where('bulan_dibayar', $month)
+                                                ->first();
+
+                        $status = $pembayaran ? 'Lunas' : 'Belum Lunas';
+                        
+                        $tagihan[] = [
+                            'tahun' => $year,
+                            'bulan' => $month,
+                            'nominal' => $nominal,
+                            'status' => $status,
+                            'is_paid' => (bool)$pembayaran
+                        ];
+                    }
+                }
+            }
+        }
+
+        return view('admin.pembayaran.create', compact('siswaList', 'selectedSiswa', 'tagihan'));
     }
 
-    /** * TAMBAHKAN FUNCTION INI AGAR TOMBOL BAYAR BERFUNGSI
-     */
+   
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -33,14 +72,12 @@ class PembayaranController extends Controller
             'jumlah_bayar' => 'required|numeric|min:0',
         ]);
 
-        // Cari data SPP untuk menentukan status (Lunas/Belum Lunas)
-        // Disini kita ambil SPP terbaru atau sesuaikan dengan tahun_dibayar
+        
         $spp = Spp::where('tahun', $request->tahun_dibayar)->first() ?? Spp::latest()->first();
 
-        // Logika penentuan status
+       
         $status = ($request->jumlah_bayar >= $spp->nominal) ? 'Lunas' : 'Belum Lunas';
 
-        // Simpan data ke database
         Pembayaran::create([
             'id_petugas' => Auth::id(),
             'id_siswa'   => $request->id_siswa,

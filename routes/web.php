@@ -86,9 +86,7 @@ Route::middleware('auth')->group(function () {
             ]);
         })->name('dashboard');
 
-        Route::get('/pembayaran', [App\Http\Controllers\User\PembayaranController::class, 'index'])->name('pembayaran.index');
-        Route::get('/pembayaran/create', [App\Http\Controllers\User\PembayaranController::class, 'create'])->name('pembayaran.create');
-        Route::post('/pembayaran', [App\Http\Controllers\User\PembayaranController::class, 'store'])->name('pembayaran.store');
+        
 
         Route::get('/siswa/link', [App\Http\Controllers\User\SiswaLinkController::class, 'create'])->name('siswa.link');
         Route::post('/siswa/link', [App\Http\Controllers\User\SiswaLinkController::class, 'store'])->name('siswa.link.store');

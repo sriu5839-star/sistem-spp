@@ -18,10 +18,6 @@
                 <a href="{{ route('user.dashboard') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-700 transition">
                     <i class="fas fa-home mr-3"></i> Dashboard
                 </a>
-                
-                <a href="{{ route('user.pembayaran.create') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-700 transition">
-                    <i class="fas fa-credit-card mr-3"></i> Pembayaran
-                </a>
             </nav>
 
             <div class="p-4 border-t border-indigo-800">
@@ -131,4 +127,3 @@
     </div>
 </body>
 </html>
-

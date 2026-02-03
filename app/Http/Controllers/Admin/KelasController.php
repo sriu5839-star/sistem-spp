@@ -8,26 +8,20 @@ use Illuminate\Http\Request;
 
 class KelasController extends Controller
 {
-    /**
-     * Menampilkan daftar Kelas
-     */
+    
     public function index()
     {
         $kelas = Kelas::orderBy('nama_kelas', 'asc')->paginate(15);
         return view('admin.kelas.index', compact('kelas'));
     }
 
-    /**
-     * Menampilkan form tambah Kelas
-     */
+   
     public function create()
     {
         return view('admin.kelas.create');
     }
 
-    /**
-     * Menyimpan data Kelas baru
-     */
+  
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -44,17 +38,12 @@ class KelasController extends Controller
             ->with('success', 'Data kelas berhasil ditambahkan.');
     }
 
-    /**
-     * Menampilkan form edit Kelas
-     */
+  
     public function edit(Kelas $kelas)
     {
         return view('admin.kelas.edit', compact('kelas'));
     }
 
-    /**
-     * Update data Kelas
-     */
     public function update(Request $request, Kelas $kelas)
     {
         $validated = $request->validate([
@@ -71,9 +60,7 @@ class KelasController extends Controller
             ->with('success', 'Data kelas berhasil diupdate.');
     }
 
-    /**
-     * Hapus data Kelas
-     */
+   
     public function destroy(Kelas $kelas)
     {
         // Cek apakah kelas sudah digunakan di siswa

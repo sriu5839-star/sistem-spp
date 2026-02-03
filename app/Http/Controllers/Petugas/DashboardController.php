@@ -15,15 +15,14 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         
-        // Total pembayaran yang dibuat oleh petugas ini
+       
         $totalPembayaran = Pembayaran::where('id_petugas', $user->id)
             ->sum('jumlah_bayar');
         
-        // Jumlah transaksi yang dibuat oleh petugas ini
         $totalTransaksi = Pembayaran::where('id_petugas', $user->id)
             ->count();
         
-        // Pembayaran hari ini
+        
         $pembayaranHariIni = Pembayaran::where('id_petugas', $user->id)
             ->whereDate('tgl_bayar', Carbon::today())
             ->count();
@@ -32,7 +31,7 @@ class DashboardController extends Controller
             ->whereDate('tgl_bayar', Carbon::today())
             ->sum('jumlah_bayar');
         
-        // Grafik pemasukan per bulan (6 bulan terakhir) - hanya yang dibuat oleh petugas ini
+      
         $grafikPemasukan = Pembayaran::select(
                 DB::raw('MONTH(tgl_bayar) as bulan'),
                 DB::raw('YEAR(tgl_bayar) as tahun'),

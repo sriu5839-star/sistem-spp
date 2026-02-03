@@ -19,10 +19,6 @@
                     <i class="fas fa-home mr-3"></i> Dashboard
                 </a>
                 
-                <a href="{{ route('user.pembayaran.index') }}" class="flex items-center p-3 rounded-lg hover:bg-indigo-700 transition">
-                    <i class="fas fa-credit-card mr-3"></i> Pembayaran
-                </a>
-                
                 <a href="{{ route('user.riwayat.index') }}" class="flex items-center p-3 rounded-lg bg-indigo-800 text-white">
                     <i class="fas fa-history mr-3"></i> Riwayat Transaksi
                 </a>
