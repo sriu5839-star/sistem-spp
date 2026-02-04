@@ -217,10 +217,15 @@
     </div>
 
     <div class="no-print" style="text-align: center; margin-top: 20px;">
-        <button onclick="window.print()" style="background: #2563eb; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
-            Cetak / Print
-        </button>
+        <div style="display:inline-flex; gap:12px;">
+            <button onclick="window.print()" style="background: #2563eb; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;">
+                Cetak / Print
+            </button>
+            <a href="{{ route('admin.pembayaran.create', ['id_siswa' => $pembayaran->siswa->id, 'tahun' => $pembayaran->tahun_dibayar]) }}"
+               style="background: #111827; color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; text-decoration: none;">
+                Kembali
+            </a>
+        </div>
     </div>
 </body>
 </html>
-

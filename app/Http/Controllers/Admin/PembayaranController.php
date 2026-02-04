@@ -12,6 +12,47 @@ use Illuminate\Support\Facades\Auth;
 
 class PembayaranController extends Controller
 {
+    public function lunaskanTahun(Request $request)
+    {
+        $validated = $request->validate([
+            'id_siswa' => 'required|exists:siswa,id',
+            'tahun' => 'required|integer',
+        ]);
+        $months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        $spp = Spp::where('tahun', $request->tahun)->first() ?? Spp::latest()->first();
+        $nominal = $spp ? (int) $spp->nominal : 0;
+        foreach ($months as $month) {
+            $p = Pembayaran::where('id_siswa', $request->id_siswa)
+                ->where('tahun_dibayar', $request->tahun)
+                ->where('bulan_dibayar', $month)
+                ->orderBy('tgl_bayar', 'desc')
+                ->first();
+            if (!$p) {
+                Pembayaran::create([
+                    'id_petugas' => Auth::id(),
+                    'id_siswa' => $request->id_siswa,
+                    'tgl_bayar' => now(),
+                    'bulan_dibayar' => $month,
+                    'tahun_dibayar' => $request->tahun,
+                    'id_spp' => $spp ? $spp->id : null,
+                    'jumlah_bayar' => $nominal,
+                    'status' => 'Lunas',
+                ]);
+            } else {
+                if (($p->status ?? '') !== 'Lunas' || (int) ($p->jumlah_bayar ?? 0) < $nominal) {
+                    $p->jumlah_bayar = $nominal;
+                    $p->status = 'Lunas';
+                    $p->tgl_bayar = now();
+                    $p->id_petugas = Auth::id();
+                    $p->save();
+                }
+            }
+        }
+        return redirect()->route('admin.pembayaran.create', [
+            'id_siswa' => $request->id_siswa,
+            'tahun' => $request->tahun,
+        ])->with('success', 'Semua bulan tahun ' . $request->tahun . ' telah dilunaskan.');
+    }
     public function checkStatus(Request $request)
     {
         $request->validate([
@@ -39,6 +80,7 @@ class PembayaranController extends Controller
             'jumlah_bayar' => $jumlah,
             'sisa' => $sisa,
             'id_spp' => $spp->id ?? null,
+            'pembayaran_id' => $p->id ?? null,
         ]);
     }
     public function create(Request $request)
@@ -79,13 +121,18 @@ class PembayaranController extends Controller
                                             ->first();
 
                     $status = $pembayaran ? ($pembayaran->status ?? 'Lunas') : 'Belum Lunas';
+                    $terbayar = $pembayaran ? (int) $pembayaran->jumlah_bayar : 0;
+                    $sisa = max(0, (int) $nominal - $terbayar);
                     
                     $tagihan[] = [
                         'tahun' => $year,
                         'bulan' => $month,
                         'nominal' => $nominal,
                         'status' => $status,
-                        'is_paid' => (bool)$pembayaran
+                        'is_paid' => (bool)$pembayaran,
+                        'pembayaran_id' => $pembayaran->id ?? null,
+                        'terbayar' => $terbayar,
+                        'sisa' => $sisa,
                     ];
                 }
         }

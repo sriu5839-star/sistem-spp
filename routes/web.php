@@ -27,6 +27,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pembayaran/check-status', [App\Http\Controllers\Admin\PembayaranController::class, 'checkStatus'])->name('pembayaran.check-status');
         Route::get('/pembayaran/create', [App\Http\Controllers\Admin\PembayaranController::class, 'create'])->name('pembayaran.create');
         Route::post('/pembayaran', [App\Http\Controllers\Admin\PembayaranController::class, 'store'])->name('pembayaran.store');
+        Route::post('/pembayaran/lunaskan-tahun', [App\Http\Controllers\Admin\PembayaranController::class, 'lunaskanTahun'])->name('pembayaran.lunaskan-tahun');
         Route::get('/pembayaran/search-siswa', [App\Http\Controllers\Admin\PembayaranController::class, 'searchSiswa'])->name('pembayaran.search-siswa');
         
         // Riwayat Pembayaran

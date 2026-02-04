@@ -128,7 +128,16 @@
                         }
                     }).catch(()=>{});
             }
-            tahun.addEventListener('change', ()=> { updateNominal(); checkStatus(); });
+            tahun.addEventListener('change', ()=> { 
+                updateNominal(); 
+                checkStatus(); 
+                const base = "{{ route('admin.pembayaran.create') }}";
+                const qs = new URLSearchParams({
+                    id_siswa: {{ $selectedSiswa->id }},
+                    tahun: tahun.value
+                });
+                window.location.href = base + '?' + qs.toString();
+            });
             bulan.addEventListener('change', checkStatus);
             document.addEventListener('DOMContentLoaded', function(){
                 updateNominal();
@@ -158,15 +167,51 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item['bulan'] }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item['tahun'] }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp {{ number_format($item['nominal'], 0, ',', '.') }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $item['status'] == 'Lunas' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                            {{ strtoupper($item['status']) }}
-                        </span>
+                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                        <div class="flex items-center justify-center gap-3">
+                            <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $item['status'] == 'Lunas' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ strtoupper($item['status']) }}
+                            </span>
+                            @if($item['status'] == 'Lunas' && !empty($item['pembayaran_id']))
+                                <a href="{{ route('admin.riwayat.nota', $item['pembayaran_id']) }}" target="_blank"
+                                   class="inline-flex items-center px-5 py-2 text-xs rounded bg-black text-white hover:bg-gray-900">
+                                    Cetak Struk
+                                </a>
+                            @endif
+                        </div>
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6 mb-4">
+        <h3 class="text-lg font-semibold text-gray-900 mb-3">Lunaskan Semua di Tahun</h3>
+        <div class="flex flex-wrap items-center gap-3">
+            @foreach([2024, 2025, 2026] as $yr)
+                @if(collect($sppList)->pluck('tahun')->contains($yr))
+                    <form method="POST" action="{{ route('admin.pembayaran.lunaskan-tahun') }}">
+                        @csrf
+                        <input type="hidden" name="id_siswa" value="{{ $selectedSiswa->id }}">
+                        <input type="hidden" name="tahun" value="{{ $yr }}">
+                        <button type="submit" class="px-4 py-2 bg-black text-white rounded hover:bg-gray-900 text-sm">
+                            Lunaskan Tahun {{ $yr }}
+                        </button>
+                    </form>
+                @endif
+            @endforeach
+        </div>
+        <p class="mt-2 text-xs text-gray-500">Semua bulan pada tahun yang dipilih akan disetel LUNAS dan struk tersedia per bulan.</p>
+    </div>
+    <div class="bg-white rounded-lg shadow mt-4 p-4">
+        @php
+            $totalNominalLunas = collect($tagihan)->filter(function($t){ return $t['status'] === 'Lunas'; })->sum('nominal');
+            $totalSisaBelum = collect($tagihan)->filter(function($t){ return $t['status'] !== 'Lunas'; })->sum('sisa');
+        @endphp
+        <div class="flex items-center justify-center gap-8 text-sm font-semibold text-gray-800">
+            <div>Total Nominal Lunas: Rp {{ number_format($totalNominalLunas, 0, ',', '.') }}</div>
+            <div>Total Nominal Belum Lunas (Sisa): Rp {{ number_format($totalSisaBelum, 0, ',', '.') }}</div>
+        </div>
     </div>
     @endif
 </div>
