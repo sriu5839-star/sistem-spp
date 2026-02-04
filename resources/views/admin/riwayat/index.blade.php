@@ -13,6 +13,7 @@
             @endphp
             <p class="text-gray-600 mt-1">
                 Kelas: <span class="font-semibold">{{ $kelasDipilih ? $kelasDipilih->nama_kelas : 'Semua Kelas' }}</span>
+                <span class="ml-4">Tahun: <span class="font-semibold">{{ $tahunDipilih ?? date('Y') }}</span></span>
             </p>
         </div>
     </div>
@@ -31,6 +32,16 @@
                     @foreach($kelas as $k)
                         <option value="{{ $k->id }}" {{ request('kelas') == $k->id ? 'selected' : '' }}>
                             {{ $k->nama_kelas }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div class="w-40">
+                <select name="tahun" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                    @foreach($tahunList as $th)
+                        <option value="{{ $th }}" {{ (isset($tahunDipilih) && (int)$tahunDipilih === (int)$th) ? 'selected' : '' }}>
+                            {{ $th }}
                         </option>
                     @endforeach
                 </select>

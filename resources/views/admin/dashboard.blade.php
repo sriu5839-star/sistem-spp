@@ -63,6 +63,111 @@
         </div>
     </div>
 
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900">Aksi Cepat Pembayaran</h3>
+                <p class="text-sm text-gray-500">Pilih siswa, bulan, dan tahun untuk melunaskan SPP</p>
+            </div>
+            <a href="{{ route('admin.pembayaran.create') }}" class="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
+                Lihat Semua Tagihan
+            </a>
+        </div>
+        <form action="{{ route('admin.pembayaran.store') }}" method="POST" id="quickPayForm" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            @csrf
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Siswa</label>
+                <select name="id_siswa" id="qp_siswa" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                    <option value="">Pilih Siswa</option>
+                    @foreach($siswaList as $s)
+                        <option value="{{ $s->id }}">{{ $s->nama }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Bulan</label>
+                <select name="bulan_dibayar" id="qp_bulan" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                    @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $bln)
+                        <option value="{{ $bln }}">{{ $bln }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Tahun</label>
+                <select name="tahun_dibayar" id="qp_tahun" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                    @foreach($sppList as $spp)
+                        <option value="{{ $spp->tahun }}" data-nominal="{{ $spp->nominal }}">{{ $spp->tahun }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Bayar (Rp)</label>
+                <input type="number" name="jumlah_bayar" id="qp_jumlah" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" min="0" required>
+                <p class="mt-1 text-xs text-gray-500">Nominal SPP: <span id="qp_nominal">-</span></p>
+            </div>
+            <div class="md:col-span-4 flex items-center gap-3">
+                <span id="qp_status" class="text-sm px-3 py-1 rounded bg-gray-100 text-gray-700">Pilih data untuk cek status</span>
+                <button type="submit" id="qp_submit" class="ml-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
+                    Bayar
+                </button>
+                <a href="{{ route('admin.pembayaran.create') }}" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 text-sm">
+                    Batal
+                </a>
+            </div>
+        </form>
+        @push('scripts')
+        <script>
+        (function(){
+            const siswa = document.getElementById('qp_siswa');
+            const bulan = document.getElementById('qp_bulan');
+            const tahun = document.getElementById('qp_tahun');
+            const jumlah = document.getElementById('qp_jumlah');
+            const nominalEl = document.getElementById('qp_nominal');
+            const statusEl = document.getElementById('qp_status');
+            const submitBtn = document.getElementById('qp_submit');
+
+            function updateNominal() {
+                const opt = tahun.options[tahun.selectedIndex];
+                const nominal = opt ? parseInt(opt.getAttribute('data-nominal') || '0', 10) : 0;
+                nominalEl.textContent = 'Rp ' + (nominal.toLocaleString('id-ID'));
+                if (!jumlah.value || parseInt(jumlah.value,10) === 0) {
+                    jumlah.value = nominal;
+                }
+            }
+
+            function checkStatus() {
+                const sid = siswa.value;
+                const bln = bulan.value;
+                const th = tahun.value;
+                if (!sid || !bln || !th) return;
+                fetch(`{{ route('admin.pembayaran.check-status') }}?id_siswa=${encodeURIComponent(sid)}&bulan=${encodeURIComponent(bln)}&tahun=${encodeURIComponent(th)}`)
+                    .then(r => r.json())
+                    .then(d => {
+                        statusEl.textContent = `Status: ${d.status} | Sisa: Rp ${Number(d.sisa||0).toLocaleString('id-ID')}`;
+                        if (d.status === 'Lunas') {
+                            submitBtn.textContent = 'Sudah Lunas';
+                            submitBtn.disabled = true;
+                            submitBtn.classList.add('opacity-60','cursor-not-allowed');
+                        } else {
+                            submitBtn.textContent = 'Lunaskan';
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('opacity-60','cursor-not-allowed');
+                            if (!jumlah.value || parseInt(jumlah.value,10) === 0) {
+                                jumlah.value = d.nominal || 0;
+                            }
+                        }
+                    }).catch(()=>{});
+            }
+
+            tahun.addEventListener('change', ()=> { updateNominal(); checkStatus(); });
+            bulan.addEventListener('change', checkStatus);
+            siswa.addEventListener('change', checkStatus);
+            document.addEventListener('DOMContentLoaded', updateNominal);
+        })();
+        </script>
+        @endpush
+    </div>
+
     <!-- Statistik Tambahan -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Pembayaran Bulan Ini -->

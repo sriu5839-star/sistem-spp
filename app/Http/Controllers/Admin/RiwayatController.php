@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Pembayaran;
 use App\Models\Siswa;
 use App\Models\Kelas;
+use App\Models\Spp;
 use Illuminate\Http\Request;
 
 class RiwayatController extends Controller
@@ -14,7 +15,15 @@ class RiwayatController extends Controller
     public function index(Request $request)
     {
         
-        $query = Siswa::with(['kelas', 'pembayaran']);
+        $tahunList = Spp::orderBy('tahun', 'asc')->pluck('tahun');
+        $tahunDipilih = $request->filled('tahun') ? (int) $request->tahun : ($tahunList->count() ? (int) $tahunList->last() : (int) date('Y'));
+
+        $query = Siswa::with([
+            'kelas', 
+            'pembayaran' => function($q) use ($tahunDipilih) {
+                $q->where('tahun_dibayar', $tahunDipilih);
+            }
+        ]);
 
         
         if ($request->filled('search')) {
@@ -39,7 +48,7 @@ class RiwayatController extends Controller
             'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
         ];
 
-        return view('admin.riwayat.index', compact('riwayat', 'kelas', 'bulanList'));
+        return view('admin.riwayat.index', compact('riwayat', 'kelas', 'bulanList', 'tahunList', 'tahunDipilih'));
     }
 
   

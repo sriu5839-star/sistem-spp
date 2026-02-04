@@ -103,6 +103,9 @@ class DashboardController extends Controller
             ->whereYear('tgl_bayar', now()->year)
             ->count();
         
+        $sppList = \App\Models\Spp::orderBy('tahun', 'desc')->get();
+        $siswaList = Siswa::orderBy('nama', 'asc')->get();
+
         return view('admin.dashboard', compact(
             'totalPembayaran',
             'totalSiswa',
@@ -113,7 +116,9 @@ class DashboardController extends Controller
             'totalPembayaranBulanIni',
             'totalPembayaranHariIni',
             'jumlahTransaksiBulanIni',
-            'sppAktif'
+            'sppAktif',
+            'sppList',
+            'siswaList'
         ));
     }
 }
