@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
         // Riwayat Pembayaran
         Route::get('/riwayat', [App\Http\Controllers\Admin\RiwayatController::class, 'index'])->name('riwayat.index');
         Route::get('/riwayat/{pembayaran}/nota', [App\Http\Controllers\Admin\RiwayatController::class, 'downloadNota'])->name('riwayat.nota');
+        Route::get('/riwayat/nota-tahun', [App\Http\Controllers\Admin\RiwayatController::class, 'downloadNotaTahun'])->name('riwayat.nota-tahun');
         
         // Rekap Kelas
         Route::get('/rekap', [App\Http\Controllers\Admin\RekapController::class, 'index'])->name('rekap.index');

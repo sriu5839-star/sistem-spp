@@ -185,6 +185,12 @@
             </tbody>
         </table>
     </div>
+    <div class="mt-3 flex justify-center">
+        <a href="{{ route('admin.riwayat.nota-tahun', ['id_siswa' => $selectedSiswa->id, 'tahun' => $tahunFilter]) }}"
+           class="inline-flex items-center px-5 py-2 text-sm rounded bg-black text-white hover:bg-gray-900">
+            Cetak Struk Semua Bulan ({{ $tahunFilter }})
+        </a>
+    </div>
     <div class="bg-white rounded-lg shadow p-6 mb-4">
         <h3 class="text-lg font-semibold text-gray-900 mb-3">Lunaskan Semua di Tahun</h3>
         <div class="flex flex-wrap items-center gap-3">
