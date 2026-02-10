@@ -137,9 +137,19 @@ class PembayaranController extends Controller
                 }
         }
 
+        $firstUnpaidMonth = null;
+        if (!empty($tagihan)) {
+            foreach ($tagihan as $t) {
+                if ($t['status'] !== 'Lunas') {
+                    $firstUnpaidMonth = $t['bulan'];
+                    break;
+                }
+            }
+        }
+
         $tahunList = $sppList->pluck('tahun')->values();
         $tahunFilter = isset($year) ? $year : (int) (count($tahunList) ? $tahunList->last() : now()->year);
-        return view('admin.pembayaran.create', compact('siswaList', 'selectedSiswa', 'tagihan', 'sppList', 'tahunList', 'tahunFilter'));
+        return view('admin.pembayaran.create', compact('siswaList', 'selectedSiswa', 'tagihan', 'sppList', 'tahunList', 'tahunFilter', 'firstUnpaidMonth'));
     }
 
    

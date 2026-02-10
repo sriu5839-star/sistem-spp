@@ -38,6 +38,20 @@
             </div>
 
             <div>
+                <label for="nisn" class="block text-sm font-medium text-gray-900 mb-2">NISN</label>
+                <input
+                    id="nisn"
+                    name="nisn"
+                    type="text"
+                    value="{{ old('nisn') }}"
+                    required
+                    class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    placeholder="Nomor Induk Siswa Nasional"
+                >
+                <small id="nisn-feedback" class="text-xs mt-1 block h-4"></small>
+            </div>
+
+            <div>
                 <label for="email" class="block text-sm font-medium text-gray-900 mb-2">Email</label>
                 <input
                     id="email"
@@ -90,5 +104,46 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const nisnInput = document.getElementById('nisn');
+        const feedbackElement = document.getElementById('nisn-feedback');
+        const usernameInput = document.getElementById('username');
+        let timeout = null;
+
+        nisnInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const nisn = this.value;
+            
+            if (nisn.length < 5) {
+                feedbackElement.textContent = '';
+                return;
+            }
+
+            timeout = setTimeout(() => {
+                fetch(`{{ route('check-nisn') }}?nisn=${nisn}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            feedbackElement.textContent = `Nama Siswa: ${data.nama}`;
+                            feedbackElement.className = 'text-xs mt-1 block h-4 text-green-600 font-bold';
+                            // Auto fill username if empty
+                            if (!usernameInput.value) {
+                                usernameInput.value = data.nama;
+                            }
+                        } else {
+                            feedbackElement.textContent = data.message;
+                            feedbackElement.className = 'text-xs mt-1 block h-4 text-red-600';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        feedbackElement.textContent = '';
+                    });
+            }, 500);
+        });
+    });
+</script>
 @endsection
 

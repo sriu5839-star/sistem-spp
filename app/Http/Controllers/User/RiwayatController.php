@@ -20,7 +20,7 @@ class RiwayatController extends Controller
             $siswa = Siswa::where('id_user', $user->id)->first();
         }
 
-        $riwayat = collect();
+        $pembayaran = collect();
         $bulanList = [
             'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
             'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
@@ -39,16 +39,18 @@ class RiwayatController extends Controller
                 $query->where('tahun_dibayar', (int) $request->tahun);
             }
 
-            $riwayat = $query->orderBy('tgl_bayar', 'desc')->paginate(15)->appends($request->except('page'));
+            $pembayaran = $query->orderBy('tgl_bayar', 'desc')->paginate(15)->appends($request->except('page'));
 
             $tahunList = Pembayaran::where('id_siswa', $siswa->id)
                 ->select('tahun_dibayar')
                 ->distinct()
                 ->orderBy('tahun_dibayar')
                 ->pluck('tahun_dibayar');
+        } else {
+            $pembayaran = collect();
         }
 
-        return view('user.riwayat.index', compact('riwayat', 'bulanList', 'tahunList', 'siswa'));
+        return view('user.riwayat.index', compact('pembayaran', 'bulanList', 'tahunList', 'siswa'));
     }
 
     public function nota(Pembayaran $pembayaran)

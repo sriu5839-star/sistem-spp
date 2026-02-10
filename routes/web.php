@@ -6,7 +6,13 @@ use Illuminate\Support\Facades\Schema;
 use App\Http\Controllers\Auth\LoginController;
 
 // Default route mengarah ke halaman login
-Route::middleware('guest')->get('/', [LoginController::class, 'create']);
+Route::middleware('guest')->group(function () {
+    Route::get('/', [LoginController::class, 'create']);
+    Route::get('/register', [LoginController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register', [LoginController::class, 'register']);
+
+    Route::get('/check-nisn', [LoginController::class, 'checkNisn'])->name('check-nisn');
+});
 
 // Dashboard Routes (Protected by auth middleware)
 Route::middleware('auth')->group(function () {
@@ -37,6 +43,12 @@ Route::middleware('auth')->group(function () {
         
         // Rekap Kelas
         Route::get('/rekap', [App\Http\Controllers\Admin\RekapController::class, 'index'])->name('rekap.index');
+
+        // Chat
+        Route::get('/chat', [App\Http\Controllers\Admin\ChatController::class, 'index'])->name('chat.index');
+        Route::get('/chat/{id}', [App\Http\Controllers\Admin\ChatController::class, 'show'])->name('chat.show');
+        Route::post('/chat', [App\Http\Controllers\Admin\ChatController::class, 'store'])->name('chat.store');
+        Route::delete('/chat/{id}', [App\Http\Controllers\Admin\ChatController::class, 'destroy'])->name('chat.destroy');
     });
     
     // Petugas Routes
@@ -51,6 +63,11 @@ Route::middleware('auth')->group(function () {
         // Riwayat Pembayaran
         Route::get('/riwayat', [App\Http\Controllers\Petugas\RiwayatController::class, 'index'])->name('riwayat.index');
         Route::get('/riwayat/{pembayaran}/nota', [App\Http\Controllers\Petugas\RiwayatController::class, 'downloadNota'])->name('riwayat.nota');
+
+        // Chat
+        Route::get('/chat', [App\Http\Controllers\Petugas\ChatController::class, 'index'])->name('chat.index');
+        Route::get('/chat/{id}', [App\Http\Controllers\Petugas\ChatController::class, 'show'])->name('chat.show');
+        Route::post('/chat', [App\Http\Controllers\Petugas\ChatController::class, 'store'])->name('chat.store');
     });
 
     Route::prefix('user')->name('user.')->group(function () {
@@ -97,5 +114,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/riwayat', [App\Http\Controllers\User\RiwayatController::class, 'index'])->name('riwayat.index');
         Route::get('/riwayat/cetak', [App\Http\Controllers\User\RiwayatController::class, 'cetak'])->name('riwayat.cetak');
         Route::get('/riwayat/{pembayaran}/nota', [App\Http\Controllers\User\RiwayatController::class, 'nota'])->name('riwayat.nota');
+
+        // Chat
+        Route::get('/chat', [App\Http\Controllers\User\ChatController::class, 'index'])->name('chat.index');
+        Route::get('/chat/{id}', [App\Http\Controllers\User\ChatController::class, 'show'])->name('chat.show');
+        Route::post('/chat', [App\Http\Controllers\User\ChatController::class, 'store'])->name('chat.store');
+        Route::delete('/chat/{id}', [App\Http\Controllers\User\ChatController::class, 'destroy'])->name('chat.destroy');
     });
 });

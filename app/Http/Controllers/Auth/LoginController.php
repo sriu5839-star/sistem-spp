@@ -49,13 +49,41 @@ class LoginController extends Controller
     }
 
    
+    public function checkNisn(Request $request)
+    {
+        $request->validate([
+            'nisn' => 'required|string'
+        ]);
+
+        $siswa = \App\Models\Siswa::where('nisn', $request->nisn)->first();
+
+        if ($siswa) {
+            return response()->json([
+                'status' => 'success',
+                'nama' => $siswa->nama
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Data siswa tidak ditemukan'
+        ]);
+    }
+
     public function register(Request $request)
     {
         $validated = $request->validate([
             'username' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'nisn' => ['required', 'string', 'exists:siswa,nisn'],
         ]);
+
+        // Cek apakah NISN sudah terdaftar akun
+        $siswa = \App\Models\Siswa::where('nisn', $validated['nisn'])->first();
+        if ($siswa && $siswa->id_user) {
+            return back()->withInput()->withErrors(['nisn' => 'NISN ini sudah terhubung dengan akun lain.']);
+        }
 
         $user = User::create([
             'username' => $validated['username'],
@@ -63,6 +91,11 @@ class LoginController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => 'user',
         ]);
+
+        // Hubungkan siswa dengan user
+        if ($siswa) {
+            $siswa->update(['id_user' => $user->id]);
+        }
 
         Auth::login($user);
         $request->session()->regenerate();

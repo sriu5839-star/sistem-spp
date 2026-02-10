@@ -64,7 +64,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Bulan</label>
                 <select name="bulan_dibayar" id="pf_bulan" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" required>
                     @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $bln)
-                        <option value="{{ $bln }}">{{ $bln }}</option>
+                        <option value="{{ $bln }}" {{ (isset($firstUnpaidMonth) && $firstUnpaidMonth == $bln) ? 'selected' : '' }}>{{ $bln }}</option>
                     @endforeach
                 </select>
             </div>
